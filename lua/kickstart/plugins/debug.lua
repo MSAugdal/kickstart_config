@@ -27,21 +27,43 @@ return {
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
+    dap.adapters.codelldb = {
+      type = 'server',
+      port = '${port}',
+      executable = {
+        -- CHANGE THIS to your path!
+        command = '~/.local/share/nvim/mason/packages/codelldb/codelldb',
+        args = { '--port', '${port}' },
+
+        -- On windows you may have to uncomment this:
+        -- detached = false,
+      },
+    }
+    dap.configurations.cpp = {
+      {
+        name = 'codelldb',
+        type = 'codelldb',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+      },
+    }
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
-      automatic_setup = true,
-
       -- You can provide additional configuration to the handlers,
       -- see mason-nvim-dap README for more information
       handlers = {},
 
-      -- You'll need to check that you have the required things installed
-      -- online, please don't ask me how to install them :)
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'cppdbg',
+        'codelldb',
       },
     }
 
